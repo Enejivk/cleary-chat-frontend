@@ -3,7 +3,6 @@ import BotConfiguration from '../components/Chatbot/BotConfiguration';
 import ChatbotList from '../components/Chatbot/ChatbotList';
 import ChatPreview from '../components/Chatbot/ChatPreview';
 import CreateChatbotModal from '../components/Chatbot/CreateChatbotModal';
-import DocumentUpload from '../components/Documents/DocumentUpload';
 import { useAppSelector } from '../hooks/redux';
 
 const ChatbotPage: React.FC = () => {
@@ -18,7 +17,6 @@ const ChatbotPage: React.FC = () => {
         </div>
         
         <ChatbotList />
-        <DocumentUpload />
         <BotConfiguration />
         <ChatPreview />
       </div>
