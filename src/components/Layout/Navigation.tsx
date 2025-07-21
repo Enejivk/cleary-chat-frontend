@@ -18,9 +18,9 @@ const Navigation: React.FC = () => {
     dispatch(setTheme(theme === 'light' ? 'dark' : 'light'));
   };
   const navItems = [
-    { path: '/documents', label: 'Documents', icon: FileText },
-    { path: '/chatbot', label: 'Chatbot', icon: MessageSquare },
-    { path: '/embed', label: 'Embed', icon: Code },
+    
+    
+    
   ];
 
   return (

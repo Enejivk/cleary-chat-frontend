@@ -66,7 +66,11 @@ const chatbotSlice = createSlice({
       }
     },
     setActiveChatbot: (state, action: PayloadAction<string>) => {
-      state.activeChatbotId = action.payload;
+      if(state.activeChatbotId === action.payload){
+        state.activeChatbotId = null;
+      }else{
+        state.activeChatbotId = action.payload;
+      }
     },
     toggleBotStatus: (state, action: PayloadAction<string>) => {
       const chatbot = state.chatbots.find(bot => bot.id === action.payload);
