@@ -95,6 +95,7 @@ const CreateChatbotModal: React.FC = () => {
                   <p className="text-sm text-gray-500">No documents selected</p>
                 ) : (
                   <div className="space-y-2">
+
                     {selectedDocs.map((doc) => (
                       <div key={doc.id} className="flex items-center justify-between bg-white rounded-md p-2">
                         <div className="flex items-center space-x-2">
@@ -113,6 +114,34 @@ const CreateChatbotModal: React.FC = () => {
                         </button>
                       </div>
                     ))}
+
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        className="flex items-center space-x-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
+                        onClick={() => {
+                          // Trigger a hidden file input click
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.accept = '.pdf,.doc,.docx,.txt';
+                          input.multiple = false;
+                          input.onchange = (event: any) => {
+                            const file = event.target.files?.[0];
+                            if (file) {
+                              // You may want to dispatch an action or call a prop here
+                              // For now, just log the file
+                              // TODO: Replace with actual upload logic
+                              console.log('Selected file:', file);
+                            }
+                          };
+                          input.click();
+                        }}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Upload Document</span>
+                      </button>
+                    </div>
+                    
                   </div>
                 )}
               </div>

@@ -14,7 +14,7 @@ function App() {
         <div className="font-inter">
           <Routes>
             <Route path="/" element={<Layout />}>
-              <Route index element={<Navigate to="/documents" replace />} />
+              <Route index element={<Navigate to="/chatbot" replace />} />
               <Route path="/documents" element={<DocumentsPage />} />
               <Route path="/chatbot" element={<ChatbotPage />} />
               <Route path="/embed" element={<EmbedPage />} />
