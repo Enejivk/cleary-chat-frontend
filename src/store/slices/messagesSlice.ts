@@ -57,7 +57,9 @@ const messagesSlice = createSlice({
     },
     addMessage: (state, action: PayloadAction<{ chatId: string; message: Message }>) => {
       const chat = state.chats.find(c => c.id === action.payload.chatId);
+      console.log('nothing was found', chat, action.payload.chatId);
       if (chat) {
+        console.log('Adding message to chat:', chat.id, action.payload.message);
         chat.messages.push(action.payload.message);
         chat.lastMessage = action.payload.message.text;
         chat.lastMessageTime = action.payload.message.timestamp;

@@ -23,7 +23,6 @@ const ChatbotPage: React.FC = () => {
         </div>
         
         <ChatbotList />
-        <DocumentUpload />
         <BotConfiguration />
         <ChatPreview />
       </div>
