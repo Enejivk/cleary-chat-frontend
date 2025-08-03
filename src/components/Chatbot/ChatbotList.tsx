@@ -2,11 +2,28 @@ import React from 'react';
 import { Bot, Play, Pause, Settings, Trash2, Plus } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { setActiveChatbot, toggleBotStatus, deleteChatbot } from '../../store/slices/chatbotSlice';
+import { useGetChatbotsQuery } from '../../store/slices/chatbotApi';
 import { setActiveModal } from '../../store/slices/uiSlice';
 
 const ChatbotList: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { chatbots, activeChatbotId } = useAppSelector((state) => state.chatbot);
+  const { data: chatbotsRaw, isLoading } = useGetChatbotsQuery();
+
+const chatbots = React.useMemo(() => {
+  if (!chatbotsRaw) return [];
+  return chatbotsRaw.map((chatbot) => ({
+    ...chatbot,
+    isSelected: false,
+    isActive:  false,
+    displayName: chatbot.name?.toUpperCase() || "Unnamed",
+  }));
+}, [chatbotsRaw]);
+
+
+const activeChatbotId = useAppSelector(
+  (state) => state.chatbot.activeChatbotId
+);
+
   const documents = useAppSelector((state) => state.documents.documents);
 
   const handleCreateNew = () => {
@@ -48,7 +65,7 @@ const ChatbotList: React.FC = () => {
       </div>
 
       <div className="divide-y divide-gray-200">
-        {chatbots.length === 0 ? (
+        {!isLoading && chatbots.length == 0  && (
           <div className="p-8 text-center">
             <Bot className="w-12 h-12 mx-auto mb-4 text-gray-300" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No chatbots yet</h3>
@@ -61,8 +78,13 @@ const ChatbotList: React.FC = () => {
               <span>Create Chatbot</span>
             </button>
           </div>
-        ) : (
-          chatbots.map((chatbot) => (
+        ) }
+        {isLoading ? (
+          <div className="p-6 text-center">
+            <p className="text-gray-500">Loading chatbots...</p>
+          </div>
+        ): (
+          chatbots?.map((chatbot) => (
             <div
               key={chatbot.id}
               onClick={() => dispatch(setActiveChatbot(chatbot.id))}
@@ -86,7 +108,7 @@ const ChatbotList: React.FC = () => {
                     <div className="flex items-center space-x-3 mb-2">
                       <h3 className="text-lg font-medium text-gray-900">{chatbot.name}</h3>
                       <span className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                        chatbot.isActive 
+                        chatbot.isActive
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-gray-100 text-gray-600'
                       }`}>
@@ -101,7 +123,7 @@ const ChatbotList: React.FC = () => {
                     
                     <div className="flex items-center space-x-4 text-xs text-gray-500">
                       <span>Created: {chatbot.createdAt}</span>
-                      <span>Last trained: {chatbot.lastTrained}</span>
+                      <span>Last trained: {chatbot.lasttrained}</span>
                       <span>Documents: {chatbot.documentIds.length}</span>
                     </div>
                     
