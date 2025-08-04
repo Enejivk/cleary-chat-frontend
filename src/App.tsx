@@ -3,8 +3,9 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import Layout from './components/Layout/Layout';
 import DocumentsPage from './pages/DocumentsPage';
-import ChatbotPage from './pages/ChatbotPage';
+import ChatbotList from './pages/ChatbotList';
 import EmbedPage from './pages/EmbedPage';
+import ChatBot from './pages/chatBot';
 
 function App() {
   return (
@@ -13,10 +14,14 @@ function App() {
         <div className="font-inter">
           <Routes>
             <Route path="/" element={<Layout />}>
-              <Route index element={<Navigate to="/chatbot" replace />} />
-              <Route path="/documents" element={<DocumentsPage />} />
-              <Route path="/chatbot" element={<ChatbotPage />} />
-              <Route path="/embed" element={<EmbedPage />} />
+              <Route index element={<Navigate to="/chatbot-list" replace />} />
+              <Route path="/chatbot-list" element={<ChatbotList />} />
+              <Route path="/chatbot/:id" element={<ChatBot />} />
+
+              {/* <Route path="/documents" element={<DocumentsPage />} /> */}
+              {/* <Route path="/documents" element={<DocumentsPage />} /> */}
+              {/* <Route path="/chatbot" element={<ChatbotPage />} /> */}
+              {/* <Route path="/embed" element={<EmbedPage />} /> */}
             </Route>
           </Routes>
         </div>

@@ -1,25 +1,29 @@
 import React from "react";
 import { Bot, Play, Pause, RefreshCw, Settings, FileText } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
-import { updateChatbot, setTraining } from "../../store/slices/chatbotSlice";
+import {setTraining } from "../../store/slices/chatbotSlice";
+import { useUpdateChatbotMutation } from "../../store/slices/chatbotApi";
+import {useGetDocumentsQuery } from "../../store/slices/documentApi";
 
-const BotConfiguration: React.FC = () => {
+
+interface BotConfigurationProps {
+  activeChatbotId: string;
+}
+const BotConfiguration: React.FC<BotConfigurationProps> = ({ activeChatbotId }) => {
   const dispatch = useAppDispatch();
-  const { chatbots, activeChatbotId } = useAppSelector(
+  const { chatbots } = useAppSelector(
     (state) => state.chatbot
   );
 
-  const documents = useAppSelector((state) => state.documents.documents);
+  const [updateChatbot] = useUpdateChatbotMutation();
+  const { data: documents } = useGetDocumentsQuery();
   const activeChatbot = chatbots.find((bot) => bot.id === activeChatbotId);
+  
+  console.log("Active Chatbot:", activeChatbot);
 
   if (!activeChatbot) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="text-center text-gray-500">
-          <Bot className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-          <p>Select a chatbot to configure</p>
-        </div>
-      </div>
+      <div></div>
     );
   }
 
@@ -32,15 +36,14 @@ const BotConfiguration: React.FC = () => {
   };
 
   const handleUpdateField = (field: string, value: any) => {
-    dispatch(
-      updateChatbot({
-        id: activeChatbot.id,
-        updates: { [field]: value },
-      })
-    );
+    updateChatbot({
+      id: activeChatbot.id,
+      updates: { [field]: value },
+    });
   };
 
   const getDocumentNames = (documentIds: string[]) => {
+    if (!documents) return [];
     return documentIds
       .map((id) => documents.find((doc) => doc.id === id))
       .filter(Boolean);
@@ -153,7 +156,7 @@ const BotConfiguration: React.FC = () => {
                   doc ? (
                     <div key={doc.id} className="flex items-center space-x-2">
                       <FileText className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-700">{doc.name}</span>
+                      <span className="text-sm text-gray-700">{doc.filename}</span>
                       <span className="text-xs text-gray-500">({doc.type})</span>
                     </div>
                   ) : null

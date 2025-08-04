@@ -1,9 +1,10 @@
 import React from 'react';
 import { Palette, Settings } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { updateChatbot } from '../../store/slices/chatbotSlice';
+import { useUpdateChatbotMutation } from "../../store/slices/chatbotApi";
 
 const EmbedCustomization: React.FC = () => {
+  const [updateChatbot] = useUpdateChatbotMutation();
   const dispatch = useAppDispatch();
   const { chatbots, activeChatbotId } = useAppSelector((state) => state.chatbot);
   
@@ -24,10 +25,10 @@ const EmbedCustomization: React.FC = () => {
   }
 
   const handleUpdateField = (field: string, value: any) => {
-    dispatch(updateChatbot({
+    updateChatbot({
       id: activeChatbot.id,
       updates: { [field]: value }
-    }));
+    });
   };
 
   const colorOptions = [

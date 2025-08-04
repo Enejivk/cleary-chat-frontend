@@ -1,39 +1,38 @@
-import React, { useCallback } from 'react';
-import { Upload, FileText } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { addDocument, setUploading } from '../../store/slices/documentsSlice';
+import React, { useCallback } from "react";
+import { Upload, FileText } from "lucide-react";
+import { useAppDispatch } from "../../hooks/redux";
+import { useUploadDocumentMutation } from "../../store/slices/documentApi";
+
 
 const DocumentUpload: React.FC = () => {
   const dispatch = useAppDispatch();
-  const isUploading = useAppSelector((state) => state.documents.isUploading);
 
-  const handleFileUpload = useCallback((files: FileList | null) => {
-    if (!files || files.length === 0) return;
+  const [uploadDocument, { isLoading }] = useUploadDocumentMutation();
 
-    Array.from(files).forEach((file) => {
-      dispatch(setUploading(true));
-      
-      // Simulate upload process
-      setTimeout(() => {
-        const newDocument = {
-          id: Date.now().toString(),
-          name: file.name,
-          type: file.type.includes('pdf') ? 'PDF' : 'DOCX',
-          size: file.size,
-          uploadDate: new Date().toISOString().split('T')[0],
-          status: 'processed' as const,
-        };
-        
-        dispatch(addDocument(newDocument));
-        dispatch(setUploading(false));
-      }, 2000);
-    });
-  }, [dispatch]);
+  const handleFileUpload = useCallback(
+    async (files: FileList | null) => {
+      if (!files || files.length === 0) return;
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    handleFileUpload(e.dataTransfer.files);
-  }, [handleFileUpload]);
+      try {
+        const uploadPromises = Array.from(files).map(async (file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          await uploadDocument(formData).unwrap();
+        });
+        await Promise.all(uploadPromises);
+      } catch (error) {
+      } 
+    },
+    [dispatch, uploadDocument]
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      handleFileUpload(e.dataTransfer.files);
+    },
+    [handleFileUpload]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -49,13 +48,15 @@ const DocumentUpload: React.FC = () => {
         <div className="p-4 bg-blue-50 rounded-full">
           <Upload className="w-8 h-8 text-blue-600" />
         </div>
-        
+
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Documents</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Upload Documents
+          </h3>
           <p className="text-sm text-gray-600 mb-4">
             Drag and drop your PDF or DOC files here, or click to browse
           </p>
-          
+
           <label className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors">
             <FileText className="w-4 h-4" />
             <span>Choose Files</span>
@@ -68,8 +69,8 @@ const DocumentUpload: React.FC = () => {
             />
           </label>
         </div>
-        
-        {isUploading && (
+
+        {isLoading && (
           <div className="flex items-center space-x-2 text-blue-600">
             <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             <span className="text-sm">Uploading...</span>

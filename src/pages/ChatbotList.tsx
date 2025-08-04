@@ -21,10 +21,7 @@ const ChatbotPage: React.FC = () => {
             Create and manage your AI chatbots
           </p>
         </div>
-        
         <ChatbotList />
-        <BotConfiguration />
-        <ChatPreview />
       </div>
       
       {activeModal === 'create-chatbot' && <CreateChatbotModal />}

@@ -16,8 +16,8 @@ export const chatbotApi = createApi({
       query: () => 'chatbots/get_chatbots',
       providesTags: ['Chatbot'],
     }),
-
-    createChatbot: builder.mutation<Chatbot, Partial<Chatbot>>({
+    
+    createChatbot: builder.mutation<Chatbot, FormData>({
       query: (newChatbot) => ({
         url: 'chatbots/create_chatbot',
         method: 'POST',

@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { X, Bot, FileText, Wand2, Plus, Minus } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
-import { createChatbot } from "../../store/slices/chatbotSlice";
+import { useCreateChatbotMutation } from "../../store/slices/chatbotApi";
 import { setActiveModal } from "../../store/slices/uiSlice";
 import { clearDocumentSelection } from "../../store/slices/documentsSlice";
+import { useGetDocumentsQuery } from "../../store/slices/documentApi";
 
 const CreateChatbotModal: React.FC = () => {
+  const [createChatbot, { isLoading }] = useCreateChatbotMutation();
+
   const dispatch = useAppDispatch();
-  const { documents, selectedDocuments } = useAppSelector(
-    (state) => state.documents
-  );
+  const { selectedDocuments } = useAppSelector((state) => state.documents);
+  const { data: documents } = useGetDocumentsQuery();
 
   interface CrateNewChatBot {
     name: string;
@@ -35,11 +37,11 @@ const CreateChatbotModal: React.FC = () => {
   const [localSelectedDocs, setLocalSelectedDocs] =
     useState<string[]>(selectedDocuments);
 
-  const selectedDocs = documents.filter((doc) =>
+  const selectedDocs = (documents || []).filter((doc) =>
     localSelectedDocs.includes(doc.id)
   );
 
-  const availableDocs = documents.filter(
+  const availableDocs = (documents || []).filter(
     (doc) => !localSelectedDocs.includes(doc.id)
   );
 
@@ -48,39 +50,42 @@ const CreateChatbotModal: React.FC = () => {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    
-    // const fd = new FormData();
-    // fd.append("name", formData.);
-    // fd.append("systemPrompt", formData.systemPrompt);
-    // fd.append("welcomeMessage", formData.welcomeMessage);
-    // fd.append("theme", formData.theme);
-    // fd.append("primaryColor", formData.primaryColor);
-    // fd.append("isActive", "true");
-    // fd.append("isTraining", "false");
-    // fd.append("lastTrained", new Date().toISOString().split("T")[0]);
-
-    console.log("Form Data:", formData);
-
     e.preventDefault();
+    console.log("Form Data:", formData);
+    console.log("Local Selected Docs:", localSelectedDocs);
 
+    // return
     if (!formData.name.trim()) return;
 
-    dispatch(
-      createChatbot({
-        name: formData.name,
-        systemPrompt: formData.systemPrompt,
-        documentIds: localSelectedDocs,
-        isActive: true,
-        isTraining: false,
-        lastTrained: new Date().toISOString().split("T")[0],
-        welcomeMessage: formData.welcomeMessage,
-        theme: formData.theme,
-        primaryColor: formData.primaryColor,
-      })
-    );
+    // Prepare form data
+    const fd = new FormData();
+    fd.append("name", formData.name);
+    fd.append("systemPrompt", formData.systemPrompt);
+    fd.append("welcomeMessage", formData.welcomeMessage);
+    fd.append("theme", formData.theme);
+    fd.append("primaryColor", formData.primaryColor);
+    fd.append("isActive", "true");
+    fd.append("isTraining", "false");
+    fd.append("lastTrained", new Date().toISOString().split("T")[0]);
+    fd.append("documentIds", JSON.stringify(localSelectedDocs));
 
-    dispatch(clearDocumentSelection());
-    dispatch(setActiveModal(null));
+    // 📎 Append new document files (if any)
+    if (formData.newDocument) {
+      formData.newDocument.forEach((file) => {
+        fd.append("newDocument", file);
+      });
+    }
+
+    //Submit form data using RTK Query mutation
+    createChatbot(fd)
+      .unwrap()
+      .then(() => {
+        dispatch(clearDocumentSelection());
+        handleClose();
+      })
+      .catch((error) => {
+        console.error("Failed to create chatbot:", error);
+      });
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -143,7 +148,7 @@ const CreateChatbotModal: React.FC = () => {
                         <div className="flex items-center space-x-2">
                           <FileText className="w-4 h-4 text-blue-600" />
                           <span className="text-sm text-gray-700">
-                            {doc.name}
+                            {doc.filename}
                           </span>
                           <span className="text-xs text-gray-500">
                             ({doc.type})
@@ -176,10 +181,7 @@ const CreateChatbotModal: React.FC = () => {
                       input.onchange = (event: any) => {
                         const file = event.target.files?.[0];
                         if (file) {
-                          setLocalSelectedDocs((prev) => [
-                            ...prev,
-                            file.name,
-                          ]);
+                          setLocalSelectedDocs((prev) => [...prev, file.name]);
                           setFormData((prev) => {
                             return {
                               ...prev,
@@ -214,7 +216,7 @@ const CreateChatbotModal: React.FC = () => {
                         <div className="flex items-center space-x-2">
                           <FileText className="w-4 h-4 text-gray-400" />
                           <span className="text-sm text-gray-700">
-                            {doc.name}
+                            {doc.filename}
                           </span>
                           <span className="text-xs text-gray-500">
                             ({doc.type})
@@ -308,6 +310,7 @@ const CreateChatbotModal: React.FC = () => {
             >
               Cancel
             </button>
+
             <button
               type="submit"
               disabled={!formData.name.trim()}
@@ -316,6 +319,7 @@ const CreateChatbotModal: React.FC = () => {
               <Wand2 className="w-4 h-4" />
               <span>Create Chatbot</span>
             </button>
+            
           </div>
         </form>
       </div>
