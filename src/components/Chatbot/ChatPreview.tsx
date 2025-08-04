@@ -1,29 +1,36 @@
-import React, { useState } from 'react';
-import { Send, Bot, User } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { addMessage } from '../../store/slices/messagesSlice';
+import React, { useState } from "react";
+import { Send, Bot, User } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { addMessage } from "../../store/slices/messagesSlice";
+import { useRef } from "react";
 
 interface ChatPreviewProps {
   activeChatbotId: string;
 }
 
 const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
+  const chatMessageRef = useRef<HTMLDivElement>(null);
+
+  
   const dispatch = useAppDispatch();
-  const { activeChat, chats } = useAppSelector((state) => state.messages);
-  const { chatbots } = useAppSelector(
-    (state) => state.chatbot
-  );
+  const { chats } = useAppSelector((state) => state.messages);
+  const { chatbots } = useAppSelector((state) => state.chatbot);
   const [inputText, setInputText] = useState("");
 
   const activeChatbot = chatbots.find((bot) => bot.id === activeChatbotId);
-  const activeChatData = chats.find((chat) => chat.id === activeChat);
+  const activeChatData = chats[activeChatbotId];
+
+  console.log("Active Chatbot:", activeChatbot);
+  console.log("activeChatData", activeChatData);
+  console.log("activeChatId", activeChatbotId);
+  console.log("chat", chats);
 
   if (!activeChatbot) {
     return <div></div>;
   }
 
   const handleSend = () => {
-    if (!inputText.trim() || !activeChat) return;
+    if (!inputText.trim() || !activeChatbotId) return;
 
     const newMessage = {
       id: Date.now().toString(),
@@ -32,7 +39,7 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
       timestamp: new Date().toISOString(),
     };
 
-    dispatch(addMessage({ chatId: activeChat, message: newMessage }));
+    dispatch(addMessage({ chatbotId: activeChatbotId, message: newMessage }));
     setInputText("");
 
     // Simulate bot response
@@ -43,7 +50,9 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
         sender: "bot" as const,
         timestamp: new Date().toISOString(),
       };
-      dispatch(addMessage({ chatId: activeChat, message: botResponse }));
+      dispatch(
+        addMessage({ chatbotId: activeChatbotId, message: botResponse })
+      );
     }, 1000);
   };
 
@@ -88,6 +97,7 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
         ) : (
           activeChatData.messages.map((message) => (
             <div
+              ref={chatMessageRef}
               key={message.id}
               className={`flex items-start space-x-3 ${
                 message.sender === "user" ? "justify-end" : "justify-start"

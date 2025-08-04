@@ -5,6 +5,7 @@ import { useCreateChatbotMutation } from "../../store/slices/chatbotApi";
 import { setActiveModal } from "../../store/slices/uiSlice";
 import { clearDocumentSelection } from "../../store/slices/documentsSlice";
 import { useGetDocumentsQuery } from "../../store/slices/documentApi";
+import Button from "../UI/Button";
 
 const CreateChatbotModal: React.FC = () => {
   const [createChatbot, { isLoading }] = useCreateChatbotMutation();
@@ -136,10 +137,12 @@ const CreateChatbotModal: React.FC = () => {
                 Selected Documents ({selectedDocs.length})
               </h4>
               <div className="bg-blue-50 rounded-lg p-3 max-h-32 overflow-y-auto">
-                {selectedDocs.length === 0 ? (
+                {selectedDocs.length === 0 &&
+                (!formData.newDocument || formData.newDocument.length === 0) ? (
                   <p className="text-sm text-gray-500">No documents selected</p>
                 ) : (
                   <div className="space-y-2">
+                    {/* Show selected docs from storage */}
                     {selectedDocs.map((doc) => (
                       <div
                         key={doc.id}
@@ -167,6 +170,39 @@ const CreateChatbotModal: React.FC = () => {
                         </button>
                       </div>
                     ))}
+                    {/* Show newly uploaded files */}
+                    {formData.newDocument &&
+                      formData.newDocument.map((file, idx) => (
+                        <div
+                          key={file.name + idx}
+                          className="flex items-center justify-between bg-white rounded-md p-2"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <FileText className="w-4 h-4 text-blue-600" />
+                            <span className="text-sm text-gray-700">
+                              {file.name}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              (uploaded)
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                newDocument:
+                                  prev.newDocument?.filter(
+                                    (_, i) => i !== idx
+                                  ) || null,
+                              }));
+                            }}
+                            className="text-red-600 hover:text-red-800 p-1 rounded"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
                   </div>
                 )}
                 <div className="flex justify-end">
@@ -178,18 +214,21 @@ const CreateChatbotModal: React.FC = () => {
                       input.type = "file";
                       input.accept = ".pdf,.doc,.docx,.txt";
                       input.multiple = false;
+
                       input.onchange = (event: any) => {
                         const file = event.target.files?.[0];
                         if (file) {
-                          setLocalSelectedDocs((prev) => [...prev, file.name]);
                           setFormData((prev) => {
                             return {
                               ...prev,
-                              newDocument: [file],
+                              newDocument: prev.newDocument
+                                ? [...prev.newDocument, file]
+                                : [file],
                             };
                           });
                         }
                       };
+                      
                       input.click();
                     }}
                   >
@@ -303,22 +342,22 @@ const CreateChatbotModal: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
-            <button
-              type="button"
+            
+            <Button
+              disabled={isLoading}
               onClick={handleClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-            >
-              Cancel
-            </button>
+              className="flex items-center space-x-2"
+              Icon={X}
+              text="Cancel"
+            />
 
-            <button
+            <Button
+              disabled={!formData.name.trim() || isLoading}
               type="submit"
-              disabled={!formData.name.trim()}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <Wand2 className="w-4 h-4" />
-              <span>Create Chatbot</span>
-            </button>
+              className="flex items-center space-x-2"
+              Icon={Wand2}
+              text={isLoading ? "Creating..." : "Create Chatbot"}
+            />
             
           </div>
         </form>

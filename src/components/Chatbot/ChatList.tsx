@@ -1,15 +1,21 @@
-import React from 'react';
-import { MessageSquare, User } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { setActiveChat } from '../../store/slices/messagesSlice';
+import React from "react";
+import { MessageSquare, User } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { setActiveChat } from "../../store/slices/messagesSlice";
 
 const ChatList: React.FC = () => {
   const dispatch = useAppDispatch();
   const { chats, activeChat } = useAppSelector((state) => state.messages);
+  // Convert chats object to array for rendering
+  const chatArray = Object.values(chats);
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return (
+      date.toLocaleDateString() +
+      " " +
+      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
   };
 
   return (
@@ -17,21 +23,23 @@ const ChatList: React.FC = () => {
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">Chat History</h2>
       </div>
-      
+
       <div className="max-h-96 overflow-y-auto">
-        {chats.length === 0 ? (
+        {chatArray.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
             <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
             <p>No conversations yet</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
-            {chats.map((chat) => (
+            {chatArray.map((chat) => (
               <button
                 key={chat.id}
                 onClick={() => dispatch(setActiveChat(chat.id))}
                 className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
-                  activeChat === chat.id ? 'bg-blue-50 border-r-2 border-blue-600' : ''
+                  activeChat === chat.id
+                    ? "bg-blue-50 border-r-2 border-blue-600"
+                    : ""
                 }`}
               >
                 <div className="flex items-start space-x-3">

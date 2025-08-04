@@ -19,13 +19,13 @@ const BotConfiguration: React.FC<BotConfigurationProps> = ({ activeChatbotId }) 
   const { data: documents } = useGetDocumentsQuery();
   const activeChatbot = chatbots.find((bot) => bot.id === activeChatbotId);
   
-  console.log("Active Chatbot:", activeChatbot);
 
   if (!activeChatbot) {
     return (
       <div></div>
     );
   }
+
 
   const handleTrain = () => {
     dispatch(setTraining({ id: activeChatbot.id, isTraining: true }));

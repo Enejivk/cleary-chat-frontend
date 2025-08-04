@@ -1,8 +1,6 @@
 import React from "react";
 import BotConfiguration from "../components/Chatbot/BotConfiguration";
-import ChatbotList from "../components/Chatbot/ChatbotList";
 import ChatPreview from "../components/Chatbot/ChatPreview";
-import CreateChatbotModal from "../components/Chatbot/CreateChatbotModal";
 import { useAppSelector } from "../hooks/redux";
 import { useParams } from "react-router-dom";
 

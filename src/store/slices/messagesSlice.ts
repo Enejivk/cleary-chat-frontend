@@ -16,13 +16,13 @@ interface Chat {
 }
 
 interface MessagesState {
-  chats: Chat[];
+  chats: { [key: string]: Chat };
   activeChat: string | null;
 }
 
 const initialState: MessagesState = {
-  chats: [
-    {
+  chats: {
+    '561acca2-a0a4-4755-a6e2-4cd735f8a40b': {
       id: '1',
       visitorId: 'visitor-1',
       lastMessage: 'What does your company do?',
@@ -34,7 +34,7 @@ const initialState: MessagesState = {
         { id: '4', text: 'We specialize in AI-powered customer support solutions that help businesses automate their customer service.', sender: 'bot', timestamp: '2025-01-16T14:30:15Z' },
       ],
     },
-    {
+    'abe15c45-c599-4ab2-9d02-e78e798b1551': {
       id: '2',
       visitorId: 'visitor-2',
       lastMessage: 'How do I get started?',
@@ -44,7 +44,7 @@ const initialState: MessagesState = {
         { id: '6', text: 'Getting started is easy! You can begin by uploading your documents and training your bot.', sender: 'bot', timestamp: '2025-01-15T16:45:20Z' },
       ],
     },
-  ],
+  },
   activeChat: null,
 };
 
@@ -55,14 +55,13 @@ const messagesSlice = createSlice({
     setActiveChat: (state, action: PayloadAction<string | null>) => {
       state.activeChat = action.payload;
     },
-    addMessage: (state, action: PayloadAction<{ chatId: string; message: Message }>) => {
-      const chat = state.chats.find(c => c.id === action.payload.chatId);
-      console.log('nothing was found', chat, action.payload.chatId);
+    addMessage: (state, action: PayloadAction<{ chatbotId: string; message: Message }>) => {
+      const { chatbotId, message } = action.payload;
+      const chat = state.chats[chatbotId];
       if (chat) {
-        console.log('Adding message to chat:', chat.id, action.payload.message);
-        chat.messages.push(action.payload.message);
-        chat.lastMessage = action.payload.message.text;
-        chat.lastMessageTime = action.payload.message.timestamp;
+        chat.messages.push(message);
+        chat.lastMessage = message.text;
+        chat.lastMessageTime = message.timestamp;
       }
     },
   },
