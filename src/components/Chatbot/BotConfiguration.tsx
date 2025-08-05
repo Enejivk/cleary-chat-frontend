@@ -3,6 +3,7 @@ import { Bot, Play, Pause, RefreshCw, Settings, FileText } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import {setTraining } from "../../store/slices/chatbotSlice";
 import { useUpdateChatbotMutation } from "../../store/slices/chatbotApi";
+
 import {useGetDocumentsQuery } from "../../store/slices/documentApi";
 
 
@@ -16,6 +17,7 @@ const BotConfiguration: React.FC<BotConfigurationProps> = ({ activeChatbotId }) 
   );
 
   const [updateChatbot] = useUpdateChatbotMutation();
+  
   const { data: documents } = useGetDocumentsQuery();
   const activeChatbot = chatbots.find((bot) => bot.id === activeChatbotId);
   

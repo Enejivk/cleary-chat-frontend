@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Send, Bot, User } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { addMessage } from "../../store/slices/messagesSlice";
+import { useGetChatbotMessagesQuery } from "../../store/slices/messageApi";
 import { useRef } from "react";
 
 interface ChatPreviewProps {
@@ -11,19 +12,15 @@ interface ChatPreviewProps {
 const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
   const chatMessageRef = useRef<HTMLDivElement>(null);
 
-  
   const dispatch = useAppDispatch();
   const { chats } = useAppSelector((state) => state.messages);
+  const { data: messages } = useGetChatbotMessagesQuery(activeChatbotId);
+  console.log("Messages from API:", messages);
   const { chatbots } = useAppSelector((state) => state.chatbot);
   const [inputText, setInputText] = useState("");
 
   const activeChatbot = chatbots.find((bot) => bot.id === activeChatbotId);
   const activeChatData = chats[activeChatbotId];
-
-  console.log("Active Chatbot:", activeChatbot);
-  console.log("activeChatData", activeChatData);
-  console.log("activeChatId", activeChatbotId);
-  console.log("chat", chats);
 
   if (!activeChatbot) {
     return <div></div>;
@@ -74,28 +71,8 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {!activeChatData ? (
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div
-                className="p-2 rounded-full"
-                style={{ backgroundColor: activeChatbot.primaryColor }}
-              >
-                <Bot className="w-4 h-4 text-white" />
-              </div>
-              <div className="max-w-xs px-4 py-2 rounded-lg bg-gray-100 text-gray-900">
-                <p className="text-sm">{activeChatbot.welcomeMessage}</p>
-              </div>
-            </div>
-            <div className="text-center text-gray-500 mt-8">
-              <p className="text-sm">This is a preview of your chatbot</p>
-              <p className="text-xs text-gray-400 mt-1">
-                Select a chat from the history to view real conversations
-              </p>
-            </div>
-          </div>
-        ) : (
-          activeChatData.messages.map((message) => (
+        {messages && messages.length > 0 ? (
+          messages.map((message) => (
             <div
               ref={chatMessageRef}
               key={message.id}
@@ -123,7 +100,7 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
                     : {}
                 }
               >
-                <p className="text-sm">{message.text}</p>
+                <p className="text-sm">{message.content}</p>
                 <p className="text-xs mt-1 opacity-70">
                   {new Date(message.timestamp).toLocaleTimeString([], {
                     hour: "2-digit",
@@ -138,6 +115,26 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
               )}
             </div>
           ))
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div
+                className="p-2 rounded-full"
+                style={{ backgroundColor: activeChatbot.primaryColor }}
+              >
+                <Bot className="w-4 h-4 text-white" />
+              </div>
+              <div className="max-w-xs px-4 py-2 rounded-lg bg-gray-100 text-gray-900">
+                <p className="text-sm">{activeChatbot.welcomeMessage}</p>
+              </div>
+            </div>
+            <div className="text-center text-gray-500 mt-8">
+              <p className="text-sm">This is a preview of your chatbot</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Select a chat from the history to view real conversations
+              </p>
+            </div>
+          </div>
         )}
       </div>
 

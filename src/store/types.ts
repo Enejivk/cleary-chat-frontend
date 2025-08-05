@@ -20,3 +20,10 @@ export interface Document {
   type: string;
   size: number;
 }
+
+export interface Message {
+  id: string;
+  content: string;
+  sender: 'user' | 'bot';
+  timestamp: string;
+}

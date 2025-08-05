@@ -6,6 +6,7 @@ import messagesSlice from './slices/messagesSlice';
 import uiSlice from './slices/uiSlice';
 import { chatbotApi } from './slices/chatbotApi';
 import { documentApi } from './slices/documentApi';
+import { messageApi } from './slices/messageApi';
 
 export const store = configureStore({
   reducer: {
@@ -16,11 +17,13 @@ export const store = configureStore({
     ui: uiSlice,
     [chatbotApi.reducerPath]: chatbotApi.reducer,
     [documentApi.reducerPath]: documentApi.reducer,
+    [messageApi.reducerPath]: messageApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
   .concat(chatbotApi.middleware)
-  .concat(documentApi.middleware),
+  .concat(documentApi.middleware)
+  .concat(messageApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
