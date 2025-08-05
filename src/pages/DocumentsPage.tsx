@@ -1,8 +1,4 @@
 import React from 'react';
-import BotConfiguration from '../components/Chatbot/BotConfiguration';
-import ChatPreview from '../components/Chatbot/ChatPreview';
-import DocumentUpload from '../components/Documents/DocumentUpload';
-
 import ChatbotList from '../components/Chatbot/ChatbotList';
 import CreateChatbotModal from '../components/Chatbot/CreateChatbotModal';
 import { useAppSelector } from '../hooks/redux';

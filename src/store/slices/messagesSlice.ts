@@ -64,8 +64,17 @@ const messagesSlice = createSlice({
         chat.lastMessageTime = message.timestamp;
       }
     },
+    clearChatHistory: (state, action: PayloadAction<string>) => {
+      const chatbotId = action.payload;
+      const chat = state.chats[chatbotId];
+      if (chat) {
+        chat.messages = [];
+        chat.lastMessage = '';
+        chat.lastMessageTime = '';
+      }
+    },
   },
 });
 
-export const { setActiveChat, addMessage } = messagesSlice.actions;
+export const { setActiveChat, addMessage, clearChatHistory } = messagesSlice.actions;
 export default messagesSlice.reducer;

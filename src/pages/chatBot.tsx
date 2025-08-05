@@ -7,7 +7,6 @@ import { useParams } from "react-router-dom";
 const Chatbot: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const theme = useAppSelector((state) => state.ui.theme);
-
   return (
     <>
       <div className="space-y-8">
