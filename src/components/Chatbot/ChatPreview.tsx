@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Send, Bot, User } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
-import { addMessage } from "../../store/slices/messagesSlice";
 import { useGetChatbotMessagesQuery } from "../../store/slices/messageApi";
+import { useSendMessageMutation } from "../../store/slices/messageApi";
+import type { Message } from "../../store/types";
 import { useRef } from "react";
 
 interface ChatPreviewProps {
@@ -11,16 +12,30 @@ interface ChatPreviewProps {
 
 const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
   const chatMessageRef = useRef<HTMLDivElement>(null);
-
-  const dispatch = useAppDispatch();
   const { chats } = useAppSelector((state) => state.messages);
   const { data: messages } = useGetChatbotMessagesQuery(activeChatbotId);
+  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
+  const [sendMessage] = useSendMessageMutation();
+
   console.log("Messages from API:", messages);
   const { chatbots } = useAppSelector((state) => state.chatbot);
   const [inputText, setInputText] = useState("");
 
   const activeChatbot = chatbots.find((bot) => bot.id === activeChatbotId);
   const activeChatData = chats[activeChatbotId];
+
+    useEffect(() => {
+      if (messages && Array.isArray(messages)) {
+        setMessageHistory((prev)=> [...messages, ...prev]);
+      }
+    }, [messages]);
+
+    useEffect(() => {
+      if (chatMessageRef.current) {
+        chatMessageRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    }, [messageHistory]);
+
 
   if (!activeChatbot) {
     return <div></div>;
@@ -29,28 +44,41 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
   const handleSend = () => {
     if (!inputText.trim() || !activeChatbotId) return;
 
-    const newMessage = {
+    const newMessage: Message = {
       id: Date.now().toString(),
-      text: inputText,
-      sender: "user" as const,
+      content: inputText,
+      role: "user",
       timestamp: new Date().toISOString(),
     };
-
-    dispatch(addMessage({ chatbotId: activeChatbotId, message: newMessage }));
+    setMessageHistory((prev) => [...prev, newMessage]);
     setInputText("");
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse = {
-        id: (Date.now() + 1).toString(),
-        text: "I'm a demo bot response. In a real implementation, this would be generated based on your documents and AI model.",
-        sender: "bot" as const,
-        timestamp: new Date().toISOString(),
-      };
-      dispatch(
-        addMessage({ chatbotId: activeChatbotId, message: botResponse })
-      );
-    }, 1000);
+    interface SendMessageParams {
+      query: string;
+      document_id: string[];
+      messageHistory: Message[];
+      chatbot_id: string;
+    }
+
+    sendMessage({
+      query: inputText,
+      document_id: activeChatbot.documentIds,
+      messageHistory: messageHistory,
+      chatbot_id: activeChatbotId,
+    } as SendMessageParams)
+      .unwrap()
+      .then((response: string) => {
+        const botMessage: Message = {
+          id: Date.now().toString(),
+          content: response,
+          role: "bot",
+          timestamp: new Date().toISOString(),
+        };
+        setMessageHistory((prev) => [...prev, botMessage]);
+      })
+      .catch((error: unknown) => {
+        console.error("Error sending message:", error);
+      });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -71,16 +99,16 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages && messages.length > 0 ? (
-          messages.map((message) => (
+        {messageHistory && messageHistory.length > 0 ? (
+          messageHistory.map((message) => (
             <div
               ref={chatMessageRef}
               key={message.id}
               className={`flex items-start space-x-3 ${
-                message.sender === "user" ? "justify-end" : "justify-start"
+                message.role === "user" ? "justify-end" : "justify-start"
               }`}
             >
-              {message.sender === "bot" && (
+              {message.role === "bot" && (
                 <div className="p-2 bg-blue-100 rounded-full">
                   <Bot
                     className="w-4 h-4"
@@ -90,12 +118,12 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
               )}
               <div
                 className={`max-w-xs px-4 py-2 rounded-lg ${
-                  message.sender === "user"
+                  message.role === "user"
                     ? `text-white`
                     : "bg-gray-100 text-gray-900"
                 }`}
                 style={
-                  message.sender === "user"
+                  message.role === "user"
                     ? { backgroundColor: activeChatbot.primaryColor }
                     : {}
                 }
@@ -108,7 +136,7 @@ const ChatPreview: React.FC<ChatPreviewProps> = ({ activeChatbotId }) => {
                   })}
                 </p>
               </div>
-              {message.sender === "user" && (
+              {message.role === "user" && (
                 <div className="p-2 bg-gray-100 rounded-full">
                   <User className="w-4 h-4 text-gray-600" />
                 </div>

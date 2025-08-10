@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { Message } from '../types';
 
 export interface SendMessageRequest {
   query: string;
   document_id: string[];
-  messageHistory: any[];
+  messageHistory: Message[];
   chatbot_id: string;
 }
 
@@ -18,7 +19,7 @@ export const messageApi = createApi({
     reducerPath: 'messageApi',
     baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_URL }),
     tagTypes: ["Messages"],
-    
+
     endpoints: (builder) => ({
         getChatbotMessages: builder.query<Message[], string>({
             query: (chatbotId) => `/chatbots/chatbot/${chatbotId}/messages`,

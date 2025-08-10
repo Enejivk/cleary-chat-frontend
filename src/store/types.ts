@@ -24,6 +24,6 @@ export interface Document {
 export interface Message {
   id: string;
   content: string;
-  sender: 'user' | 'bot';
+  role: 'user' | 'bot';
   timestamp: string;
 }
