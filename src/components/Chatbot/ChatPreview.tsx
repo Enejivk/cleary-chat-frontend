@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Send, Bot, User } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import {useAppSelector } from "../../hooks/redux";
 import { useGetChatbotMessagesQuery } from "../../store/slices/messageApi";
 import { useSendMessageMutation } from "../../store/slices/messageApi";
 import type { Message } from "../../store/types";
